@@ -1,0 +1,600 @@
+/* Homepage.css - Hover-to-expand sidebar implementation */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+  color: white;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+.homepage-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 1rem 2rem;
+  background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.header-subtitle {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-style: italic;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  z-index: 101;
+  white-space: nowrap;
+  max-width: 90vw;
+  text-align: center;
+}
+
+/* Hover-to-expand Sidebar - Matches the provided images */
+.hover-sidebar {
+  position: fixed;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  width: 70px; /* Narrow width when collapsed */
+  background: rgba(40, 40, 40, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 35px; /* Rounded like in the images */
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  padding: 15px 0;
+  transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  contain: layout style;
+  overflow: hidden;
+}
+
+.hover-sidebar:hover {
+  width: 200px; /* Expanded width on hover */
+}
+
+.hover-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  margin-bottom: 15px;
+  min-height: 40px;
+  flex-shrink: 0;
+}
+
+.hover-sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+}
+
+.hover-sidebar-title {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+  margin-left: 12px;
+  overflow: hidden;
+}
+
+.hover-sidebar-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 10px;
+  flex: 1;
+}
+
+.hover-sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px;
+  border-radius: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  width: 100%;
+  min-height: 48px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hover-sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.hover-sidebar-item.active {
+  background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+  color: #212121;
+  box-shadow: 0 4px 12px rgba(79, 195, 247, 0.3);
+}
+
+.hover-sidebar-item.active:hover {
+  background: linear-gradient(135deg, #29b6f6 0%, #0288d1 100%);
+}
+
+.hover-sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.hover-sidebar-text {
+  white-space: nowrap;
+  overflow: hidden;
+  flex: 1;
+  display: inline-block;
+}
+
+/* Right Panel - Transparent backgrounds */
+.right-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  z-index: 75;
+  padding: 80px 20px 20px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.data-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+}
+
+.data-panel {
+  background: rgba(30, 30, 30, 0.6);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.data-panel-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.data-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #cccccc;
+  margin-bottom: 0.5rem;
+}
+
+.data-item strong {
+  color: #ffffff;
+}
+
+/* Map Widget - Positioned within right panel for visibility */
+.map-widget-container {
+  position: relative;
+  bottom: auto;
+  right: auto;
+  width: 100%;
+  height: 250px;
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  z-index: 75;
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
+  contain: layout style;
+}
+
+.map-widget-title {
+  padding: 10px 15px 8px 15px;
+  margin: 0;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.map-widget-map-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 0.75rem 0.75rem;
+  min-height: 0;
+}
+
+/* Leaflet map specific styles */
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  background: #0d1117 !important;
+  border-radius: 0 0 0.75rem 0.75rem;
+  will-change: auto;
+}
+
+.leaflet-tile {
+  filter: brightness(0.8) contrast(1.2) hue-rotate(200deg) !important;
+  image-rendering: optimizeSpeed;
+}
+
+.leaflet-control-zoom {
+  background: rgba(30, 30, 30, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 4px !important;
+}
+
+.leaflet-control-zoom a {
+  background: rgba(30, 30, 30, 0.9) !important;
+  color: #ffffff !important;
+  border: none !important;
+  transition: background-color 0.2s ease;
+}
+
+.leaflet-control-zoom a:hover {
+  background: rgba(50, 50, 50, 0.9) !important;
+  color: #00aaff !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: rgba(20, 20, 20, 0.95) !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(20, 20, 20, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.leaflet-popup-close-button {
+  color: #ffffff !important;
+  transition: color 0.2s ease;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #00aaff !important;
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.scroll-indicator:hover {
+  opacity: 1;
+}
+
+/* Profile Icon */
+.profile-icon-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 200;
+}
+
+.profile-menu {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background: rgba(43, 43, 43, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.profile-menu-item {
+  display: block;
+  padding: 12px 16px;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-menu-item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.profile-menu-item:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.profile-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Atmospheric Conditions Panel */
+.atmospheric-conditions-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.25rem;
+  z-index: 75;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .right-panel {
+    width: 350px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .header-title {
+    font-size: 1.25rem;
+  }
+
+  .header-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .hover-sidebar {
+    width: 60px;
+  }
+
+  .hover-sidebar:hover {
+    width: 180px;
+  }
+
+  .right-panel {
+    width: 320px;
+    padding: 70px 15px 15px 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hover-sidebar {
+    position: fixed;
+    top: auto;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    height: 60px;
+    flex-direction: row;
+    border-radius: 30px;
+    padding: 0 15px;
+  }
+
+  .hover-sidebar:hover {
+    width: auto;
+    height: 60px;
+  }
+
+  .hover-sidebar-header {
+    display: none;
+  }
+
+  .hover-sidebar-items {
+    flex-direction: row;
+    gap: 10px;
+    padding: 0;
+  }
+
+  .hover-sidebar-item {
+    min-height: 40px;
+    width: 40px;
+    padding: 8px;
+    border-radius: 20px;
+    justify-content: center;
+  }
+
+  .hover-sidebar-text {
+    display: none;
+  }
+
+  .right-panel {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+    gap: 1rem;
+    top: auto;
+    right: auto;
+    border: none;
+    background: transparent;
+    margin-bottom: 100px; /* Space for bottom sidebar */
+  }
+
+  .data-panel {
+    background: rgba(30, 30, 30, 0.8);
+  }
+
+  .header-title {
+    font-size: 1.1rem;
+  }
+
+  .header-subtitle {
+    font-size: 0.7rem;
+    top: 15px;
+  }
+
+  .profile-icon-container {
+    top: 15px;
+    right: 15px;
+  }
+
+  .map-widget-container {
+    height: 200px;
+  }
+
+  .atmospheric-conditions-panel {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hover-sidebar-item {
+    width: 36px;
+    min-height: 36px;
+    padding: 6px;
+  }
+
+  .data-panel {
+    padding: 1rem;
+  }
+
+  .data-panel-title {
+    font-size: 0.9rem;
+  }
+
+  .data-item {
+    font-size: 0.8rem;
+  }
+
+  .map-widget-title {
+    font-size: 0.8rem;
+  }
+
+  .map-widget-container {
+    height: 180px;
+  }
+}
+
+/* Animation Utilities */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .hover-sidebar {
+    transition: none;
+  }
+  
+  .hover-sidebar-item {
+    transition: none;
+  }
+}
+
+/* Focus styles for accessibility */
+.hover-sidebar-item:focus,
+.profile-menu-item:focus {
+  outline: 2px solid #4fc3f7;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .hover-sidebar {
+    border: 2px solid #ffffff;
+  }
+  
+  .data-panel {
+    border: 2px solid #ffffff;
+  }
+}
+
