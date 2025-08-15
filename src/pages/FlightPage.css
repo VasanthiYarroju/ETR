@@ -1,0 +1,14 @@
+/* Custom styles for FlightPage */
+
+/* Remove the blue outline when a Leaflet marker is focused/clicked */
+.leaflet-marker-icon.custom-plane-icon:focus,
+.leaflet-marker-icon.custom-plane-icon:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Optional: Ensure no default border around the custom div icon */
+.leaflet-marker-icon.custom-plane-icon {
+  border: none !important;
+  /* Add other styles if needed, e.g., for background, but usually not for an image */
+}

@@ -1,3 +1,5 @@
+// src/Home.jsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
 import axios from 'axios';
@@ -5,8 +7,8 @@ import { Plane, Thermometer, Waves, Leaf, Sprout, User, X, Menu, ChevronsDown } 
 import { MapContainer, TileLayer, Popup, CircleMarker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useNavigate } from 'react-router-dom';
 
-// Fix for default markers in react-leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -20,30 +22,33 @@ const EARTHQUAKES_GEOJSON_URL = 'https://earthquake.usgs.gov/earthquakes/feed/v1
 
 // --- Sidebar Configuration (UPDATED) ---
 const sidebarItems = [
-  { id: 'flight-view', icon: <Plane size={28} />, text: 'Flight View' },
+  { id: 'flight-view', icon: <Plane size={28} />, text: 'Flight View' }, // This item will now navigate
   { id: 'atmosphere', icon: <Thermometer size={28} />, text: 'Atmosphere' },
   { id: 'oceanary', icon: <Waves size={28} />, text: 'Oceanary' },
   { id: 'agricultureA', icon: <Sprout size={28} />, text: 'Crop Health' },
   { id: 'land-use', icon: <Leaf size={28} />, text: 'Land Use' },
 ];
 
-const MapWidget = ({ activeItem, flightData, weatherData, earthquakeData, oceanData }) => {
+// MapWidget now only needs data relevant to its active items (no flightData prop anymore)
+const MapWidget = ({ activeItem, weatherData, earthquakeData, oceanData }) => {
   const [mapCenter, setMapCenter] = useState([20, 0]);
   const [mapZoom, setMapZoom] = useState(2);
 
   useEffect(() => {
     // Adjust map view based on active item
     switch (activeItem) {
-      case 'flight-view':
-        setMapCenter([40, -20]);
-        setMapZoom(3);
-        break;
+      // Removed 'flight-view' case as it's now handled by FlightPage.jsx
       case 'atmosphere':
         setMapCenter([30, 0]);
         setMapZoom(2);
         break;
       case 'oceanary':
         setMapCenter([0, 0]);
+        setMapZoom(2);
+        break;
+      case 'agricultureA':
+      case 'land-use':
+        setMapCenter([30, 0]);
         setMapZoom(2);
         break;
       default:
@@ -54,24 +59,7 @@ const MapWidget = ({ activeItem, flightData, weatherData, earthquakeData, oceanD
 
   const renderDataPoints = () => {
     switch (activeItem) {
-      case 'flight-view':
-        return (flightData || []).slice(0, 50).map(flight => (
-          <CircleMarker
-            key={flight.id}
-            center={[flight.latitude, flight.longitude]}
-            radius={3}
-            pathOptions={{ color: '#00aaff', fillColor: '#00aaff', fillOpacity: 0.8 }}
-          >
-            <Popup>
-              <div>
-                <strong>{flight.callsign}</strong><br />
-                Altitude: {Math.round(flight.altitude || 0)}m<br />
-                Speed: {Math.round(flight.velocity || 0)}km/h<br />
-                Country: {flight.country}
-              </div>
-            </Popup>
-          </CircleMarker>
-        ));
+      // Removed 'flight-view' case as flight data is now on FlightPage
         
       case 'atmosphere':
         return (weatherData || []).map(weather => (
@@ -122,8 +110,7 @@ const MapWidget = ({ activeItem, flightData, weatherData, earthquakeData, oceanD
 
   const getMapTitle = () => {
     switch (activeItem) {
-      case 'flight-view':
-        return 'Live Flight Tracking';
+      // Removed 'flight-view' case
       case 'atmosphere':
         return 'Global Weather Map';
       case 'oceanary':
@@ -160,52 +147,29 @@ const MapWidget = ({ activeItem, flightData, weatherData, earthquakeData, oceanD
   );
 };
 
+
 const Homepage = () => {
   const globeEl = useRef();
 
   // --- State for UI & Data ---
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeItem, setActiveItem] = useState('flight-view'); // Default view set to flight-view
+  const [activeItem, setActiveItem] = useState('atmosphere'); // Default view changed, flight is separate now
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   
   // --- State for Globe Data Layers ---
   const [countriesData, setCountriesData] = useState({ features: [] });
   const [citiesData, setCitiesData] = useState({ features: [] });
   const [earthquakeData, setEarthquakeData] = useState({ features: [] });
-  const [flightData, setFlightData] = useState([]);
+  // Removed flightData and liveFlights states as they are now in FlightPage.jsx
   const [weatherData, setWeatherData] = useState([]);
   const [oceanData, setOceanData] = useState([]);
-  // Live flights used for globe visualization (only moving flights)
-  const [liveFlights, setLiveFlights] = useState([]);
   const [hoveredPolygon, setHoveredPolygon] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [clickedRegionData, setClickedRegionData] = useState(null);
+  const navigate = useNavigate();
 
   // --- Real-time Data Fetching Functions ---
-  const fetchFlightData = async () => {
-    try {
-      // Using local server endpoint that connects to OpenSky Network API
-      const response = await axios.get('http://localhost:5000/api/flights');
-      if (response.data && response.data.flights) {
-        const flights = response.data.flights.map((flight, index) => ({
-          id: flight.id || index,
-          callsign: flight.callsign || 'Unknown',
-          longitude: flight.longitude,
-          latitude: flight.latitude,
-          altitude: flight.altitude || 0,
-          velocity: flight.velocity || 0,
-          heading: flight.heading || 0,
-          country: flight.country || 'Unknown'
-        })).filter(flight => flight.longitude && flight.latitude);
-        setFlightData(flights);
-        setLiveFlights(flights.filter(f => typeof f.velocity === 'number' && f.velocity > 0));
-      }
-    } catch (error) {
-      console.error('Error fetching flight data:', error);
-      // Fallback to mock data
-      setFlightData(generateMockFlightData());
-    }
-  };
+  // Removed fetchFlightData as it's moved to FlightPage.jsx
 
   const fetchWeatherData = async () => {
     try {
@@ -301,18 +265,7 @@ const Homepage = () => {
   };
 
   // --- Mock Data Generators ---
-  const generateMockFlightData = () => {
-    return Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      callsign: `FL${String(i + 1000).slice(-3)}`,
-      longitude: (Math.random() - 0.5) * 360,
-      latitude: (Math.random() - 0.5) * 180,
-      altitude: Math.random() * 12000 + 3000,
-      velocity: Math.random() * 300 + 200,
-      heading: Math.random() * 360,
-      country: ['USA', 'UK', 'Germany', 'France', 'Japan'][Math.floor(Math.random() * 5)]
-    }));
-  };
+  // Removed generateMockFlightData as it's no longer needed here
 
   const generateMockWeatherData = () => {
     const cities = [
@@ -355,7 +308,7 @@ const Homepage = () => {
           fetch(COUNTRIES_GEOJSON_URL).then(res => res.json()).then(setCountriesData).catch(() => setCountriesData({ features: [] })),
           fetch(CITIES_GEOJSON_URL).then(res => res.json()).then(setCitiesData).catch(() => setCitiesData({ features: [] })),
           fetch(EARTHQUAKES_GEOJSON_URL).then(res => res.json()).then(setEarthquakeData).catch(() => setEarthquakeData({ features: [] })),
-          fetchFlightData(),
+          // Removed fetchFlightData() from here
           fetchWeatherData(),
           fetchOceanData()
         ]);
@@ -366,11 +319,9 @@ const Homepage = () => {
 
     fetchAllData();
 
-    // Set up real-time data refresh
+    // Set up real-time data refresh for the remaining active items
     const interval = setInterval(() => {
-      if (activeItem === 'flight-view') {
-        fetchFlightData();
-      } else if (activeItem === 'atmosphere') {
+      if (activeItem === 'atmosphere') {
         fetchWeatherData();
       } else if (activeItem === 'oceanary') {
         fetchOceanData();
@@ -378,7 +329,7 @@ const Homepage = () => {
     }, 30000); // Refresh every 30 seconds
 
     return () => clearInterval(interval);
-  }, [activeItem]);
+  }, [activeItem]); // Depend on activeItem to re-evaluate what to fetch
 
   // --- Globe Configuration Effect (REMOVED AUTO-ROTATION) ---
   useEffect(() => {
@@ -393,23 +344,41 @@ const Homepage = () => {
   const handlePolygonClick = async (polygon) => {
     if (activeItem === 'atmosphere' && polygon && polygon.properties) {
       // Get the center of the country for atmospheric data
-      const bounds = polygon.geometry.coordinates[0];
       let centerLat = 0, centerLng = 0;
-      
-      if (bounds && bounds.length > 0) {
-        bounds.forEach(coord => {
-          centerLng += coord[0];
-          centerLat += coord[1];
-        });
-        centerLat /= bounds.length;
-        centerLng /= bounds.length;
-        
-        const atmosphericData = await fetchAtmosphericDataForRegion(centerLat, centerLng);
-        setClickedRegionData({
-          ...atmosphericData,
-          countryName: polygon.properties.NAME || 'Unknown Region'
+      let totalCoords = 0;
+
+      // This is a more robust way to find a centroid for GeoJSON polygons (can be complex)
+      if (polygon.geometry.coordinates && polygon.geometry.coordinates.length > 0) {
+        polygon.geometry.coordinates.forEach(ring => { // Rings for polygons (outer, inner holes)
+          ring.forEach(coordSet => { // A ring can be a simple array of [lng, lat] or nested for multi-polygons
+            if (Array.isArray(coordSet[0])) { // If it's a nested array (e.g., for MultiPolygon)
+              coordSet.forEach(coord => {
+                centerLng += coord[0];
+                centerLat += coord[1];
+                totalCoords++;
+              });
+            } else { // Simple [lng, lat]
+              centerLng += coordSet[0];
+              centerLat += coordSet[1];
+              totalCoords++;
+            }
+          });
         });
       }
+      
+      if (totalCoords > 0) {
+        centerLat /= totalCoords;
+        centerLng /= totalCoords;
+      } else { // Fallback if no coordinates found
+        centerLat = polygon.properties.latitude || 0; // Try a pre-defined center
+        centerLng = polygon.properties.longitude || 0;
+      }
+      
+      const atmosphericData = await fetchAtmosphericDataForRegion(centerLat, centerLng);
+      setClickedRegionData({
+        ...atmosphericData,
+        countryName: polygon.properties.NAME || 'Unknown Region'
+      });
     }
   };
 
@@ -430,7 +399,7 @@ const Homepage = () => {
     setSelectedLocation(point);
   };
 
-  // REMOVED ANIMATIONS - Simple sidebar item component without framer-motion
+  // SidebarItem component (remains mostly the same)
   const SidebarItem = ({ item, isActive, onClick, isOpen }) => {
     const itemStyle = {
       display: 'flex',
@@ -455,7 +424,7 @@ const Homepage = () => {
         <div style={{ minWidth: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {React.cloneElement(item.icon, { color: iconColor })}
         </div>
-        {/* REMOVED ANIMATIONS - Show text directly without motion */}
+        {/* Show text directly without motion */}
         {isOpen && (
           <span
             style={{ fontSize: '16px', whiteSpace: 'nowrap', fontWeight: '500', color: textColor }}
@@ -472,39 +441,7 @@ const Homepage = () => {
     const panelStyle = { display: 'flex', flexDirection: 'column', gap: '20px' };
     
     switch (activeItem) {
-      case 'flight-view':
-        return (
-          <div style={panelStyle}>
-            <div style={styles.widget}>
-              <h3 style={styles.widgetTitle}>Flights Moving Now</h3>
-              <div style={{fontSize:'24px', fontWeight:'700', color:'#4fc3f7'}}>{(flightData || []).filter(f=> typeof f.velocity==='number' && f.velocity>0).length.toLocaleString()}</div>
-              <div style={{fontSize:'12px', opacity:0.8}}>updated live</div>
-            </div>
-            <div style={styles.widget}>
-              <h3 style={styles.widgetTitle}>Live Flight Data</h3>
-              <div style={styles.listContainer}>
-                {(flightData || []).slice(0, 8).map(flight => (
-                  <div key={flight.id} style={styles.listItem}>
-                    <span style={styles.listItemTitle}>{flight.callsign}</span>
-                    <span style={styles.listItemText}>
-                      Alt: {Math.round(flight.altitude || 0)}m | {Math.round(flight.velocity || 0)}km/h
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div style={styles.widget}>
-              <MapWidget 
-                activeItem={activeItem}
-                flightData={flightData}
-                weatherData={weatherData}
-                earthquakeData={earthquakeData}
-                oceanData={oceanData}
-              />
-            </div>
-          </div>
-        );
+      // Removed 'flight-view' case as it's no longer handled here
         
       case 'atmosphere':
         return (
@@ -558,7 +495,6 @@ const Homepage = () => {
             <div style={styles.widget}>
               <MapWidget 
                 activeItem={activeItem}
-                flightData={flightData}
                 weatherData={weatherData}
                 earthquakeData={earthquakeData}
                 oceanData={oceanData}
@@ -585,7 +521,6 @@ const Homepage = () => {
             <div style={styles.widget}>
               <MapWidget 
                 activeItem={activeItem}
-                flightData={flightData}
                 weatherData={weatherData}
                 earthquakeData={earthquakeData}
                 oceanData={oceanData}
@@ -594,7 +529,7 @@ const Homepage = () => {
           </div>
         );
         
-      // UPDATED: Cases for new sidebar items
+      // Cases for new sidebar items
       case 'agricultureA':
       case 'land-use':
         const title = activeItem === 'agricultureA' ? 'Crop Health Analysis' : 'Land Use Information';
@@ -618,7 +553,6 @@ const Homepage = () => {
             <div style={styles.widget}>
               <MapWidget 
                 activeItem={activeItem}
-                flightData={flightData}
                 weatherData={weatherData}
                 earthquakeData={earthquakeData}
                 oceanData={oceanData}
@@ -635,18 +569,7 @@ const Homepage = () => {
   // --- Get current data for globe visualization ---
   const getCurrentGlobeData = () => {
     switch (activeItem) {
-      case 'flight-view':
-        return {
-          pointsData: liveFlights || [],
-          pointLabel: d => `Flight: ${d.callsign} | Alt: ${Math.round(d.altitude)}m | Speed: ${Math.round(d.velocity)}km/h`,
-          pointRadius: 0.2,
-          pointColor: () => '#00aaff',
-          pointAltitude: d => d.altitude / 100000,
-          pointsMerge: true,
-          pointResolution: 12,
-          pointAsGlobe: true,
-          showPolygons: false
-        };
+      // Removed 'flight-view' case as it's separated
       case 'atmosphere':
         return {
           pointsData: weatherData || [],
@@ -665,7 +588,7 @@ const Homepage = () => {
           pointAltitude: 0.02,
           showPolygons: false
         };
-      // UPDATED: Cases for new sidebar items
+      // Cases for new sidebar items
       case 'agricultureA':
       case 'land-use':
         return {
@@ -677,13 +600,13 @@ const Homepage = () => {
           showPolygons: true
         };
       default:
-        return {
+        return { // Default behavior if activeItem is not specifically handled for globe points
           pointsData: [],
           pointLabel: '',
           pointRadius: 0,
           pointColor: '',
           pointAltitude: 0,
-          showPolygons: false
+          showPolygons: true // Default to showing polygons for general globe context
         };
     }
   };
@@ -716,7 +639,7 @@ const Homepage = () => {
         "Welcome to the Future of Earth Observation – Real-time Data that Speaks for the Planet."
       </p>
       
-      {/* REMOVED ANIMATIONS - Static sidebar with your original styling */}
+      {/* Static sidebar with your original styling */}
       <div
         style={{
           ...styles.sidebar,
@@ -724,7 +647,6 @@ const Homepage = () => {
         }}
       >
         <div style={styles.sidebarHeader}>
-          {/* REMOVED ANIMATIONS - Show logo directly without motion */}
           {isSidebarOpen && (
             <div style={styles.logoContainer}>
               <Plane color="#fff" size={32} />
@@ -736,14 +658,21 @@ const Homepage = () => {
           </button>
         </div>
         <div style={styles.menuItemsContainer}>
+          
           {sidebarItems.map((item) => (
             <SidebarItem
               key={item.id}
               item={item}
               isActive={activeItem === item.id}
               onClick={() => {
-                setActiveItem(item.id);
-                setClickedRegionData(null); // Reset clicked region data when switching modes
+                if (item.id === 'flight-view') {
+                  // Navigate to separate flight radar page
+                  navigate('/flights');
+                } else {
+                  // Keep current homepage behavior for other items
+                  setActiveItem(item.id);
+                  setClickedRegionData(null); // Clear region data when switching views
+                }
               }}
               isOpen={isSidebarOpen}
             />
@@ -755,7 +684,7 @@ const Homepage = () => {
         <RightPanel />
       </div>
       
-      {/* REMOVED ANIMATIONS - Static scroll indicator */}
+      {/* Static scroll indicator */}
       <div style={styles.scrollIndicator}>
         <ChevronsDown color="white" size={28} />
       </div>
@@ -764,7 +693,6 @@ const Homepage = () => {
         <button onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} style={styles.profileButton}>
           <User color="#333" size={24} />
         </button>
-        {/* REMOVED ANIMATIONS - Show profile menu directly without motion */}
         {isProfileMenuOpen && (
           <div style={styles.profileMenu}>
             <div style={styles.profileMenuPointer}></div>
@@ -842,7 +770,7 @@ const styles = {
   logoText: {
     fontWeight: 'bold',
     fontSize: '18px',
-    whiteSpace: 'nowrap'
+    whiteWhiteSpace: 'nowrap'
   },
   menuItemsContainer: {
     display: 'flex',
@@ -976,4 +904,3 @@ const styles = {
 };
 
 export default Homepage;
-

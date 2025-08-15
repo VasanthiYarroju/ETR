@@ -1,7 +1,11 @@
-const express = require('express');
-const cors = require('cors');
-const https = require('https');
-const querystring = require('querystring');
+// Before: const express = require('express');
+import express from 'express';
+// Before: const cors = require('cors');
+import cors from 'cors';
+// Before: const https = require('https');
+import https from 'https';
+// Before: const querystring = require('querystring');
+import querystring from 'querystring';
 
 const app = express();
 const PORT = 5000;
@@ -28,9 +32,9 @@ let authMethod = 'oauth2';
 // Rate limiting variables
 let lastSuccessfulData = null;
 let lastFetchTime = 0;
-const MIN_FETCH_INTERVAL = 10000; // 10 seconds minimum between API calls
+const MIN_FETCH_INTERVAL = 10000; 
 
-// Function to get OAuth2 access token
+
 async function getAccessToken() {
     return new Promise((resolve, reject) => {
         // Check if we have a valid token
@@ -301,7 +305,7 @@ app.get('/api/flights', async (req, res) => {
 function processFlightData(states) {
     return states
         .filter(state => state[6] !== null && state[5] !== null && state[1] !== null) // Filter out flights without coordinates or callsign
-        .slice(0, 500) // Increased limit for authenticated users
+        .slice(0, 2000) // Increased limit for authenticated users
         .map((state, index) => ({
             id: `${state[0]}_${index}`,
             icao24: state[0],
@@ -452,5 +456,5 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`👤 Username: ${OPENSKY_USERNAME}`);
 });
 
-module.exports = app;
-
+// Before: module.exports = app;
+export default app;
